@@ -65,7 +65,8 @@
               "buildTarget": "shortnr-client:build:production"
             },
             "development": {
-              "buildTarget": "shortnr-client:build:development"
+              "buildTarget": "shortnr-client:build:development",
+              "host": "host.docker.internal"
             }
           },
           "defaultConfiguration": "development"
