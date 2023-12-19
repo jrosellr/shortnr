@@ -1,0 +1,13 @@
+services:
+  web:
+    build: ./shortnr-client
+    ports:
+      - "4200:4200"
+  api:
+    build: ./shortnr-service/shortnr.WebApi
+    ports:
+      - "5120:8080"
+    environment:
+      - ASPNETCORE_HTTP_PORT=8080
+
+
