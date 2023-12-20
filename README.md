@@ -25,13 +25,13 @@ I'd like to deploy it to AWS but I'm leaving that as a next step, so for now I'l
 
 This project will be considered complete when the following requirements are met:
 
-  - [] The project runs locally using Docker Compose **only**
-  - [] The project supports the hot reloading of the Docker images while running
-  - [] The project supports both Windows and Linux dev environments
-  - [] All automated tests pass (Cypress, Postman, unit tests, etc.)
-  - [] UAT is done
-  - [] Automated code quality reports are all green
-  - [] Automated security reports are all green
+  - [ ] The project runs locally using Docker Compose **only**
+  - [ ] The project supports the hot reloading of the Docker images while running
+  - [ ] The project supports both Windows and Linux dev environments
+  - [ ] All automated tests pass (Cypress, Postman, unit tests, etc.)
+  - [ ] UAT is done
+  - [ ] Automated code quality reports are all green
+  - [ ] Automated security reports are all green
 
 ## Next Steps
 The next steps of the project are:
