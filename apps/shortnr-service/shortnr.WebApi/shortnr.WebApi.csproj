@@ -9,4 +9,11 @@
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" />
+
+    <PackageReference Include="AWSSDK.Core" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+  </ItemGroup>
+
 </Project>
