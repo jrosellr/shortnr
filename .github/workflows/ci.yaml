@@ -54,7 +54,7 @@ jobs:
       
       - name: 'generate source code SBOM'
         run: |
-          docker run --rm -it -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
             cyclonedx/cyclonedx-cli add files \
               --no-input \
               --base-path "/src/dist/shortnr-client" \
@@ -62,14 +62,14 @@ jobs:
 
       - name: 'merge SBOM files'
         run: |
-          docker run --rm -it -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
             cyclonedx/cyclonedx-cli merge \
               --input-files "/src/npm_sbom.json" "/src/source_sbom.json" \
               --output-file "/src/sbom.json"
       
       - name: 'run OSV Scanner analysis'
         run: |
-          docker run --rm -it -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
             ghcr.io/google/osv-scanner \
               --sbom "/src/sbom.json" \
               --format "sarif" \
