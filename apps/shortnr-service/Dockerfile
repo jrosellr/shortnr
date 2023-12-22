@@ -13,7 +13,6 @@ RUN dotnet restore -r "linux-musl-$TARGETARCH"
 # copy and publish app and libraries
 COPY **/* .
 RUN dotnet publish -c "Debug" --no-restore -o "/app"
-# RUN rm /app/*.dbg /app/*.Development.json
 
 
 # final stage/image
