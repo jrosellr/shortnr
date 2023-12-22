@@ -47,8 +47,7 @@ jobs:
         run: npm install --global @cyclonedx/cyclonedx-npm
 
       - name: 'echo PWD'
-        run: echo ${{ github.workspace }}
-        working-directory: ./apps/shortnr-client
+        run: echo "${{ github.workspace }}/apps/shortnr-client/src"
 
       # - name: 'upload OSV Scanner analysis to GitHub'
       #   uses: github/codeql-action/upload-sarif@v2
