@@ -7,7 +7,9 @@
     "start:container": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "ng lint",
+    "lint:ci": "ng lint --format @microsoft/eslint-formatter-sarif --output-file eslint-report.sarif"
   },
   "private": true,
   "dependencies": {
@@ -24,11 +26,20 @@
     "zone.js": "~0.14.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.0.7",
+    "@angular-devkit/build-angular": "17.0.7",
+    "@angular-eslint/builder": "17.1.1",
+    "@angular-eslint/eslint-plugin": "17.1.1",
+    "@angular-eslint/eslint-plugin-template": "17.1.1",
+    "@angular-eslint/schematics": "17.1.1",
+    "@angular-eslint/template-parser": "17.1.1",
     "@angular/cli": "^17.0.7",
     "@angular/compiler-cli": "^17.0.0",
     "@angular/language-server": "^17.0.3",
+    "@microsoft/eslint-formatter-sarif": "^2.1.7",
     "@types/jasmine": "~5.1.0",
+    "@typescript-eslint/eslint-plugin": "6.13.1",
+    "@typescript-eslint/parser": "6.13.1",
+    "eslint": "8.54.0",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

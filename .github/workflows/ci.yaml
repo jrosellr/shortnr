@@ -1,0 +1,44 @@
+name: ci
+run-name: 'Running CI'
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'main'
+  
+  pull_request:
+
+jobs:
+  angular-static-analysis:
+    name: 'ng lint'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'setup node'
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 20.10.0
+          cache: npm
+
+      - name: 'npm install'
+        run: npm install
+
+      - name: 'run ESLint analysis'
+        run: npm run lint:ci
+        continue-on-error: true
+
+      - name: 'upload analysis to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
+
+    
