@@ -1,13 +1,12 @@
-FROM node:20.10.0 as base
+FROM node:20.10.0-bullseye as base
 
 WORKDIR /app
+
 COPY package.json .
-COPY package-lock.json .
+COPY .npmrc .
 
-FROM base as build
-RUN npm ci
+RUN npm install
 
-FROM build as release
 COPY . .
 EXPOSE 4200
 
