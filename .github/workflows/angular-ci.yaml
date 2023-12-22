@@ -30,7 +30,7 @@ jobs:
       - name: 'checkout code'
         uses: actions/checkout@v3
 
-      - uses: .github/actions/node/install
+      - uses: ./.github/actions/node/install
         with:
           node-version: 20.10.0
 
