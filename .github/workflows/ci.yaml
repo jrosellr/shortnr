@@ -128,3 +128,5 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
+          message: |
+            This is a test
