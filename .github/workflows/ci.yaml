@@ -86,6 +86,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-request: write
     defaults:
       run:
         working-directory: ./apps/shortnr-client
