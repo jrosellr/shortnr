@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
+    "build:ci": "ng build",
     "lint:ci": "ng lint --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "private": true,

@@ -43,17 +43,41 @@ jobs:
           sarif_file: ./apps/shortnr-client/eslint-results.sarif
           wait-for-processing: true
 
+      - name: 'build'
+        run: npm run build:ci
+
       - name: 'install CycloneDX tools'
         run: npm install --global @cyclonedx/cyclonedx-npm
+      
+      - name: 'generate npm SBOM'
+        run: cyclonedx-npm --ignore-npm-errors --validate --output-file npm_sbom.json --omit dev
+      
+      - name: 'generate source code SBOM'
+        run: |
+          docker run --rm -it -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            cyclonedx/cyclonedx-cli add files \
+              --no-input \
+              --base-path "/src/dist/shortnr-client" \
+              --output-file "/src/source_sbom.json"
 
-      - name: 'echo PWD'
-        run: echo "${{ github.workspace }}/apps/shortnr-client/src"
+      - name: 'merge SBOM files'
+        run: |
+          docker run --rm -it -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            cyclonedx/cyclonedx-cli merge \
+              --input-files "/src/npm_sbom.json" "/src/source_sbom.json" \
+              --output-file "/src/sbom.json"
+      
+      - name: 'run OSV Scanner analysis'
+        run: |
+          docker run --rm -it -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            ghcr.io/google/osv-scanner \
+              --sbom "/src/sbom.json" \
+              --format "sarif" \
+              --output "/src/sca-results.sarif"
 
-      # - name: 'upload OSV Scanner analysis to GitHub'
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   with:
-      #     sarif_file: ./apps/shortnr-client/eslint-results.sarif
-      #     wait-for-processing: true
+      - name: 'upload OSV Scanner analysis to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-client/sca-results.sarif
+          wait-for-processing: true
 
-
-    
