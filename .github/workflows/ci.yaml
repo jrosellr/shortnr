@@ -1,5 +1,5 @@
 name: ci
-run-name: 'Running CI'
+run-name: 'Automated CI'
 
 on:
   workflow_dispatch:
@@ -29,7 +29,6 @@ jobs:
         uses: actions/setup-node@v4.0.1
         with:
           node-version: 20.10.0
-          # cache: npm
 
       - name: 'npm install'
         run: npm install
@@ -38,10 +37,23 @@ jobs:
         run: npm run lint:ci
         continue-on-error: true
 
-      - name: 'upload analysis to GitHub'
+      - name: 'upload ESLint analysis to GitHub'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./apps/shortnr-client/eslint-results.sarif
           wait-for-processing: true
+
+      - name: 'install CycloneDX tools'
+        run: npm install --global @cyclonedx/cyclonedx-npm
+
+      - name: 'echo PWD'
+        run: echo ${{ github.workspace }}
+
+      # - name: 'upload OSV Scanner analysis to GitHub'
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   with:
+      #     sarif_file: ./apps/shortnr-client/eslint-results.sarif
+      #     wait-for-processing: true
+
 
     
