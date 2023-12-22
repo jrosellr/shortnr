@@ -106,6 +106,12 @@ jobs:
       - name: 'npm run test:ci'
         run: npm run test:ci
 
+      - name: 'upload code coverage report'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'angular-code-coverage-html-report'
+          path: apps/shortnr-client/coverage/html-report
+
       - name: 'generate PR code coverage report'
         uses: irongut/CodeCoverageSummary@v1.3.0
         if: ${{ github.event_name == 'pull_request' }}
