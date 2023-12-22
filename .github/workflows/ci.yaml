@@ -12,11 +12,14 @@ on:
 
 jobs:
   angular-static-analysis:
-    name: 'ng lint'
+    name: 'Static analysis for Angular'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-client
 
     steps:
       - name: 'checkout code'
