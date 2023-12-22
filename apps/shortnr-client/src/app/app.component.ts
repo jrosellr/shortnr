@@ -11,4 +11,8 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'shortnr-client';
+
+  public foo(): string {
+    return 'foo';
+  }
 }
