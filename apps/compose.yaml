@@ -15,6 +15,7 @@ services:
           action: rebuild
         - path: ./shortnr-client/src/
           action: sync
+
   api:
     build: ./shortnr-service
     image: shortnr/api
