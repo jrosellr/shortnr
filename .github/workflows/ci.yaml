@@ -113,6 +113,8 @@ jobs:
           filename: apps/shortnr-client/coverage/**/cobertura-coverage.xml
           format: markdown
           output: file
+          hide_complexity: true
+          thresholds: '50 50'
 
       - name: 'post code coverage report as PR comment'
         uses: marocchino/sticky-pull-request-comment@v2
