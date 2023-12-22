@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
+using Amazon.DynamoDBv2;
+using StackExchange.Redis;
 
 namespace shortnr.WebApi.Endpoints;
 
@@ -10,8 +12,9 @@ internal static class Endpoints
 {
     private static Dictionary<string, string> _shortenedUrls = new Dictionary<string, string>();
 
-    public static IResult Shorten(ShortenRequest request)
+    public static async Task<IResult> Shorten(ILoggerFactory loggerFactory, AmazonDynamoDBClient dynamoClient, ConnectionMultiplexer multiplexer, ShortenRequest request)
     {
+        var logger = loggerFactory.CreateLogger(nameof(Endpoints));
         using var md5 = MD5.Create();
         var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var hash = Convert.ToHexString(md5.ComputeHash(Encoding.UTF8.GetBytes(now.ToString())))
@@ -21,6 +24,12 @@ internal static class Endpoints
         if (!_shortenedUrls.ContainsKey(hash))
         {
             _shortenedUrls.Add(hash, request.Url);
+            var db = multiplexer.GetDatabase();
+            logger.LogWarning(multiplexer.GetStatus());
+            db.StringSet(hash, request.Url);
+
+            var tables = await dynamoClient.ListTablesAsync();
+            logger.LogWarning($"{tables.TableNames.Count}");
         }
 
         return Results.Ok(new ShortenResponse(hash));

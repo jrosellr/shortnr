@@ -1,19 +1,18 @@
 # syntax=docker/dockerfile:1
-# Learn about building .NET container images:
-# https://github.com/dotnet/dotnet-docker/blob/main/samples/README.md
+
 FROM mcr.microsoft.com/dotnet/nightly/sdk:8.0-alpine-aot AS build
 ARG TARGETARCH
-WORKDIR /source
+WORKDIR /build
 
 # copy csproj and restore as distinct layers
-COPY *.csproj .
+COPY **/*.csproj .
+COPY *.props .
 COPY *.config .
-RUN dotnet restore -r linux-musl-$TARGETARCH
+RUN dotnet restore -r "linux-musl-$TARGETARCH"
 
 # copy and publish app and libraries
-COPY . .
-RUN dotnet publish --no-restore -o /app shortnr.WebApi.csproj
-RUN rm /app/*.dbg /app/*.Development.json
+COPY **/* .
+RUN dotnet publish -c "Debug" --no-restore -o "/app"
 
 
 # final stage/image
@@ -23,3 +22,4 @@ WORKDIR /app
 COPY --from=build /app .
 USER $APP_UID
 ENTRYPOINT ["./shortnr.WebApi"]
+
