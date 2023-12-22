@@ -87,3 +87,4 @@ msbuild.wrn
 
 # Static analysis reports
 *.sarif
+*sbom.json

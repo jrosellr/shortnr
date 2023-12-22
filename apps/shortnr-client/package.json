@@ -10,6 +10,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "build:ci": "ng build",
+    "test:ci": "ng test --configuration ci",
     "lint:ci": "ng lint --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "private": true,
@@ -47,6 +48,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "karma-spec-reporter": "0.0.36",
     "typescript": "~5.2.2"
   }
 }

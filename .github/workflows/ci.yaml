@@ -81,3 +81,31 @@ jobs:
           sarif_file: ./apps/shortnr-client/sca-results.sarif
           wait-for-processing: true
 
+  angular-tests:
+    name: 'Unit Tests'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-client
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'setup node'
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 20.10.0
+
+      - name: 'npm install'
+        run: npm install
+      
+      - name: 'npm run test:ci'
+        run: npm run test:ci
+
+      - name: 'upload code coverage report'
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: ./coverage/shortnr-client/cobertura-coverage.xml
