@@ -84,3 +84,7 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+
+# Static analysis reports
+*.sarif
+*sbom.json

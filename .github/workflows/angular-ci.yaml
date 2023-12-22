@@ -1,0 +1,135 @@
+name: ci
+run-name: 'Automated CI'
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'main'
+
+    paths:
+      - apps/shortnr-client/*
+  
+  pull_request:
+    paths:
+      - apps/shortnr-client/*
+
+jobs:
+  angular-static-analysis:
+    name: 'Static analysis for Angular'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-client
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'setup node'
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 20.10.0
+
+      - name: 'npm install'
+        run: npm install
+
+      - name: 'run ESLint analysis'
+        run: npm run lint:ci
+        continue-on-error: true
+
+      - name: 'upload ESLint analysis to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-client/eslint-results.sarif
+          wait-for-processing: true
+
+      - name: 'build'
+        run: npm run build:ci
+
+      - name: 'install CycloneDX tools'
+        run: npm install --global @cyclonedx/cyclonedx-npm
+      
+      - name: 'generate npm SBOM'
+        run: cyclonedx-npm --ignore-npm-errors --validate --output-file npm_sbom.json --omit dev
+      
+      - name: 'generate source code SBOM'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            cyclonedx/cyclonedx-cli add files \
+              --no-input \
+              --base-path "/src/dist/shortnr-client" \
+              --output-file "/src/source_sbom.json"
+
+      - name: 'merge SBOM files'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            cyclonedx/cyclonedx-cli merge \
+              --input-files "/src/npm_sbom.json" "/src/source_sbom.json" \
+              --output-file "/src/sbom.json"
+      
+      - name: 'run OSV Scanner analysis'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            ghcr.io/google/osv-scanner \
+              --sbom "/src/sbom.json" \
+              --format "sarif" \
+              --output "/src/sca-results.sarif"
+
+      - name: 'upload OSV Scanner analysis to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-client/sca-results.sarif
+          wait-for-processing: true
+
+  angular-tests:
+    name: 'Unit Tests'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-client
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'setup node'
+        uses: actions/setup-node@v4.0.1
+        with:
+          node-version: 20.10.0
+
+      - name: 'npm install'
+        run: npm install
+  
+      - name: 'npm run test:ci'
+        run: npm run test:ci
+
+      - name: 'upload code coverage report'
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'angular-code-coverage-html-report'
+          path: apps/shortnr-client/coverage/shortnr-client/html-report/
+
+      - name: 'generate PR code coverage report'
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          filename: apps/shortnr-client/coverage/**/cobertura-coverage.xml
+          format: markdown
+          output: file
+          hide_complexity: true
+          thresholds: '50 50'
+
+      - name: 'post code coverage report as PR comment'
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          recreate: true
+          path: code-coverage-results.md
