@@ -1,0 +1,17 @@
+name: 'npm ci'
+description: 'Install node dependencies'
+inputs:
+  node-version:
+    description: 'Version of Node to use'
+    required: true
+    default: 20.10.0
+runs:
+  using: "composite"
+  steps:
+    - name: 'setup node'
+      uses: actions/setup-node@v4.0.1
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: 'npm install'
+      run: npm ci
