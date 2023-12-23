@@ -37,10 +37,10 @@ jobs:
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
             returntocorp/semgrep semgrep scan src \
-              --config "p/default" \
-              --metrics off \
+              --config="p/default" \
+              --metrics="off" \
               --sarif \
-              --output /src/sast-results.sarif
+              --output="/src/sast-results.sarif"
     
       - name: 'Upload static analysis results to GitHub'
         uses: github/codeql-action/upload-sarif@v2
