@@ -49,7 +49,7 @@ jobs:
               --exclude-test-projects \
               --exclude-dev \
               --json \
-              -- out "/src"
+              -- out "/src" \
               --filename "sbom.json"
 
       - name: 'Run OSV Scanner analysis'
