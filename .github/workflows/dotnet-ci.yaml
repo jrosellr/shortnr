@@ -45,7 +45,7 @@ jobs:
       - name: 'Generate SBOM'
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
-            cyclonedx/cyclonedx-dotnet dotnet CycloneDX /src/shortnr.WebApi/shortnr.WebApi.csproj \
+            cyclonedx/cyclonedx-dotnet dotnet cyclonedx /src/shortnr.WebApi/shortnr.WebApi.csproj \
               --exclude-test-projects \
               --exclude-dev \
               --json \
