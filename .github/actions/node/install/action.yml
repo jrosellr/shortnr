@@ -30,7 +30,7 @@ runs:
       shell: bash
     
     - name: 'dir test'
-      run: echo ${{ hashFiles('./apps/shortnr-client/package-lock.json') }}
+      run: echo ${{ format('{0}/{1}', inputs.working-directory, 'package-lock.json') }}
       shell: bash
 
     - name: 'cache npm dependencies'
@@ -40,7 +40,7 @@ runs:
         cache-name: npm-cache
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles(format('{0}/{1}', ${{ inputs.working-directory }}, 'package-lock.json')) }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles(format('{0}/{1}', inputs.working-directory, 'package-lock.json')) }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
