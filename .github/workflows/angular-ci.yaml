@@ -12,8 +12,8 @@ on:
       - apps/shortnr-client/*
   
   pull_request:
-    # paths:
-    #   - apps/shortnr-client/*
+    paths:
+      - apps/shortnr-client/*
 
 jobs:
   angular-static-analysis:
