@@ -34,6 +34,7 @@ jobs:
         uses: ./.github/actions/node/install
         with:
           node-version: 20.10.0
+          working-directory: ./apps/shortnr-client
 
       # - name: 'setup node'
       #   uses: actions/setup-node@v4.0.1

@@ -5,6 +5,11 @@ inputs:
     description: 'Version of Node to use'
     required: true
     default: 20.10.0
+
+  working-directory:
+    description: 'Working directory to perform the installation'
+    required: true
+
 runs:
   using: "composite"
   steps:
@@ -16,3 +21,4 @@ runs:
     - name: 'npm install'
       run: npm ci
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
