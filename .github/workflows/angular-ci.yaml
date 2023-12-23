@@ -1,4 +1,4 @@
-name: ci
+name: angular-ci
 run-name: 'Automated CI'
 
 on:
