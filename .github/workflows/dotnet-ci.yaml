@@ -1,0 +1,43 @@
+name: dotnet-ci
+run-name: '.NET - Automated CI'
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'main'
+
+  pull_request:
+    # paths:
+    #   - apps/shortnr-service/*
+
+jobs:
+  dotnet-security-scan:
+    name: 'Run security scan'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-service
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'Run static analysis'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
+            returntocorp/semgrep semgrep scan \
+              --config="p/default" \
+              --metrics="off" \
+              --sarif \
+              --output="/src/sast-results.sarif"
+    
+      - name: 'Upload static analysis results to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-service/sast-results.sarif
+          wait-for-processing: true
