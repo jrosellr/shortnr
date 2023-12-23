@@ -26,7 +26,11 @@ runs:
       shell: bash
     
     - name: 'dir test'
-      run: echo $(ls ${{ inputs.working-directory }})
+      run: echo ${{ hashFiles('inputs.working-directory/package-lock.json') }}
+      shell: bash
+    
+    - name: 'dir test'
+      run: echo ${{ hashFiles('./apps/shortnr-client/package-lock.json') }}
       shell: bash
 
     - name: 'cache npm dependencies'
