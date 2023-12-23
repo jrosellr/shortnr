@@ -4,7 +4,6 @@ inputs:
   node-version:
     description: 'Version of Node to use'
     required: true
-    default: 20.10.0
 
   working-directory:
     description: 'Working directory to perform the installation'
@@ -17,6 +16,19 @@ runs:
       uses: actions/setup-node@v4.0.1
       with:
         node-version: ${{ inputs.node-version }}
+
+    - name: 'cache npm dependencies'
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: npm-cache
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
     - name: 'npm install'
       run: npm ci
