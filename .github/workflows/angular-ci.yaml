@@ -1,5 +1,5 @@
 name: angular-ci
-run-name: 'Automated CI'
+run-name: 'Angular - Automated CI'
 
 on:
   workflow_dispatch:
@@ -8,16 +8,13 @@ on:
     branches:
       - 'main'
 
-    paths:
-      - apps/shortnr-client/*
-  
   pull_request:
     paths:
       - apps/shortnr-client/*
 
 jobs:
-  angular-static-analysis:
-    name: 'Static analysis for Angular'
+  angular-security-scan:
+    name: 'Run security scan'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,31 +24,36 @@ jobs:
         working-directory: ./apps/shortnr-client
 
     steps:
-      - name: 'checkout code'
+      - name: 'Checkout code'
         uses: actions/checkout@v3
 
-      - name: 'install npm dependencies'
+      - name: 'Install npm dependencies'
         uses: ./.github/actions/node/install
         with:
           node-version: 20.10.0
           working-directory: ./apps/shortnr-client
 
-      - name: 'run ESLint analysis'
-        run: npm run lint:ci
-        continue-on-error: true
-
-      - name: 'upload ESLint analysis to GitHub'
+      - name: 'Run static analysis'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
+            returntocorp/semgrep semgrep scan src \
+              --config="p/default" \
+              --metrics="off" \
+              --sarif \
+              --output="/src/sast-results.sarif"
+    
+      - name: 'Upload static analysis results to GitHub'
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ./apps/shortnr-client/eslint-results.sarif
+          sarif_file: ./apps/shortnr-client/sast-results.sarif
           wait-for-processing: true
 
       - name: 'build'
         run: npm run build:ci
 
-      - name: 'install CycloneDX tools'
+      - name: 'install CycloneDX npm cli'
         run: npm install --global @cyclonedx/cyclonedx-npm
-      
+
       - name: 'generate npm SBOM'
         run: cyclonedx-npm --ignore-npm-errors --validate --output-file npm_sbom.json --omit dev
       
@@ -84,8 +86,38 @@ jobs:
           sarif_file: ./apps/shortnr-client/sca-results.sarif
           wait-for-processing: true
 
+  angular-code-quality:
+    name: 'Run code quality checks'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-client
+
+    steps:
+      - name: 'checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'Install npm dependencies'
+        uses: ./.github/actions/node/install
+        with:
+          node-version: 20.10.0
+          working-directory: ./apps/shortnr-client
+
+      - name: 'Lint'
+        run: npm run lint:ci
+        continue-on-error: true
+
+      - name: 'Upload linter results to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-client/eslint-results.sarif
+          wait-for-processing: true
+
   angular-tests:
-    name: 'Unit Tests'
+    name: 'Run tests'
     runs-on: ubuntu-latest
     permissions:
       contents: read
