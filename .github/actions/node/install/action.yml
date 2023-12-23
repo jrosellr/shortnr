@@ -17,6 +17,10 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
+    - name: 'test'
+      run: echo "${{ inputs.working-directory }}/package-lock.json"
+      shell: bash
+
     - name: 'cache npm dependencies'
       id: cache-npm
       uses: actions/cache@v3
