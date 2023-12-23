@@ -17,22 +17,6 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
 
-    - name: 'test'
-      run: echo "${{ inputs.working-directory }}/package-lock.json"
-      shell: bash
-    
-    - name: 'glob test'
-      run: echo $(pwd)
-      shell: bash
-    
-    - name: 'dir test'
-      run: echo ${{ hashFiles('inputs.working-directory/package-lock.json') }}
-      shell: bash
-    
-    - name: 'dir test'
-      run: echo ${{ format('{0}/{1}', inputs.working-directory, 'package-lock.json') }}
-      shell: bash
-
     - name: 'cache npm dependencies'
       id: cache-npm
       uses: actions/cache@v3
