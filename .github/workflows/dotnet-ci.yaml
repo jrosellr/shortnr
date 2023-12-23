@@ -1,0 +1,67 @@
+name: dotnet-ci
+run-name: '.NET - Automated CI'
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - 'main'
+
+  pull_request:
+    paths:
+      - apps/shortnr-service/*
+
+jobs:
+  dotnet-security-scan:
+    name: 'Run security scan'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-service
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'Run static analysis'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
+            returntocorp/semgrep semgrep scan \
+              --config="p/default" \
+              --metrics="off" \
+              --sarif \
+              --output="/src/sast-results.sarif"
+    
+      - name: 'Upload static analysis results to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-service/sast-results.sarif
+          wait-for-processing: true
+
+      - name: 'Generate SBOM'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
+            cyclonedx/cyclonedx-dotnet /src/shortnr.WebApi/shortnr.WebApi.csproj \
+              --exclude-test-projects \
+              --exclude-dev \
+              --json \
+              --out "/src" \
+              --filename "sbom.json"
+
+      - name: 'Run OSV Scanner analysis'
+        run: |
+          docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
+            ghcr.io/google/osv-scanner \
+              --sbom "/src/sbom.json" \
+              --format "sarif" \
+              --output "/src/sca-results.sarif"
+
+      - name: 'Upload OSV Scanner analysis to GitHub'
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./apps/shortnr-service/sca-results.sarif
+          wait-for-processing: true
