@@ -9,8 +9,8 @@ on:
       - 'main'
 
   pull_request:
-    # paths:
-    #   - apps/shortnr-service/*
+    paths:
+      - apps/shortnr-service/*
 
 jobs:
   dotnet-security-scan:
@@ -41,7 +41,7 @@ jobs:
         with:
           sarif_file: ./apps/shortnr-service/sast-results.sarif
           wait-for-processing: true
-      
+
       - name: 'Generate SBOM'
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-service:/src" \
@@ -60,7 +60,7 @@ jobs:
               --format "sarif" \
               --output "/src/sca-results.sarif"
 
-      - name: 'upload OSV Scanner analysis to GitHub'
+      - name: 'Upload OSV Scanner analysis to GitHub'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./apps/shortnr-service/sca-results.sarif
