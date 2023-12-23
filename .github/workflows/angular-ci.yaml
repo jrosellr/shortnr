@@ -37,7 +37,7 @@ jobs:
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client/src:/src" \
             returntocorp/semgrep semgrep scan \
-              --config auto \
+              --config "p/default" \
               --metrics off \
               --sarif \
               --output /src/sast-results.sarif
