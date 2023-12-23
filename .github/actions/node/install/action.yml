@@ -22,7 +22,7 @@ runs:
       shell: bash
     
     - name: 'glob test'
-      run: echo "**/package-lock.json"
+      run: echo $(pwd)
       shell: bash
 
     - name: 'cache npm dependencies'
