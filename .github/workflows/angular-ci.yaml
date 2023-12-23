@@ -1,4 +1,4 @@
-name: ci
+name: angular-ci
 run-name: 'Automated CI'
 
 on:
@@ -30,13 +30,11 @@ jobs:
       - name: 'checkout code'
         uses: actions/checkout@v3
 
-      - name: 'setup node'
-        uses: actions/setup-node@v4.0.1
+      - name: 'install npm dependencies'
+        uses: ./.github/actions/node/install
         with:
           node-version: 20.10.0
-
-      - name: 'npm install'
-        run: npm install
+          working-directory: ./apps/shortnr-client
 
       - name: 'run ESLint analysis'
         run: npm run lint:ci
@@ -100,13 +98,11 @@ jobs:
       - name: 'checkout code'
         uses: actions/checkout@v3
 
-      - name: 'setup node'
-        uses: actions/setup-node@v4.0.1
+      - name: 'install npm dependencies'
+        uses: ./.github/actions/node/install
         with:
           node-version: 20.10.0
-
-      - name: 'npm install'
-        run: npm install
+          working-directory: ./apps/shortnr-client
   
       - name: 'npm run test:ci'
         run: npm run test:ci
