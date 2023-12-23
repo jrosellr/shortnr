@@ -20,6 +20,10 @@ runs:
     - name: 'test'
       run: echo "${{ inputs.working-directory }}/package-lock.json"
       shell: bash
+    
+    - name: 'glob test'
+      run: echo "**/package-lock.json"
+      shell: bash
 
     - name: 'cache npm dependencies'
       id: cache-npm
