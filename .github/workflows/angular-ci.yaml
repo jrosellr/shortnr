@@ -36,7 +36,8 @@ jobs:
       - name: 'Run static analysis'
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
-            returntocorp/semgrep semgrep ci \
+            returntocorp/semgrep semgrep scan \
+              --config auto \
               --sarif \
               --output /src/sast-results.sarif
     
