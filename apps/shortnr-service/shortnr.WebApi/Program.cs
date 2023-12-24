@@ -16,8 +16,10 @@ builder.Services.AddSingleton<ConnectionMultiplexer>((_) =>
 
 builder.Services.AddSingleton<AmazonDynamoDBClient>((_) =>
 {
-    var config = new AmazonDynamoDBConfig();
-    config.ServiceURL = "http://shortnr-database:8000";
+    var config = new AmazonDynamoDBConfig
+    {
+        ServiceURL = "http://shortnr-database:8000"
+    };
 
     return new AmazonDynamoDBClient(config);
 });
