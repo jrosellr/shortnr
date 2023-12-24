@@ -93,8 +93,10 @@ jobs:
       - name: 'Build'
         run: dotnet build --nologo --no-restore
 
-      - name: 'Run tests'
+      - name: 'Display tests'
         run: dotnet test --nologo --no-build --verbosity 'minimal' --list-tests
+
+      - name: 'Run tests'
         run: dotnet test --nologo --no-build --verbosity 'minimal' --logger trx
 
       - name: 'Upload test results'
