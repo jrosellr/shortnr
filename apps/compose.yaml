@@ -19,7 +19,9 @@ services:
           action: sync
 
   api:
-    build: ./shortnr-service
+    build:
+      context: ./shortnr-service
+      dockerfile: Dockerfile.local
     image: shortnr/api
     container_name: shortnr-api
     ports:
