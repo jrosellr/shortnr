@@ -35,7 +35,7 @@ jobs:
               --metrics="off" \
               --sarif \
               --output="/src/sast-results.sarif"
-    
+
       - name: 'Upload static analysis results to GitHub'
         uses: github/codeql-action/upload-sarif@v2
         with:
@@ -65,3 +65,44 @@ jobs:
         with:
           sarif_file: ./apps/shortnr-service/sca-results.sarif
           wait-for-processing: true
+
+  dotnet-tests:
+    name: 'Run tests'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ./apps/shortnr-service
+
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+
+      - name: 'Set up .NET'
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 'Display dotnet version'
+        run: dotnet --version
+
+      - name: 'Install dependencies'
+        run: dotnet restore --nologo
+
+      - name: 'Build'
+        run: dotnet build --nologo --no-restore
+
+      - name: 'Display tests'
+        run: dotnet test --nologo --no-build --verbosity 'minimal' --list-tests
+
+      - name: 'Run tests'
+        run: dotnet test --nologo --no-build --verbosity 'minimal' --logger trx
+
+      - name: 'Upload test results'
+          uses: actions/upload-artifact@v3
+          with:
+            name: dotnet-test-results
+            path: TestResults
+          # Use always() to always run this step to publish test results when there are test failures
+          if: ${{ always() }}
