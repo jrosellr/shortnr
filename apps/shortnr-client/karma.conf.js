@@ -41,7 +41,12 @@ module.exports = function (config) {
     },
     specReporter: {
       showBrowser: false,
-      showSpecTiming: true
+      showSpecTiming: true,
+      prefixes: {
+        success: 'OK ',
+        failure: 'KO ',
+        skipped: 'SKIPPED '
+      }
     },
     reporters: ['progress', 'kjhtml'],
     browsers: ['Chrome'],
