@@ -102,7 +102,7 @@ jobs:
       - name: 'Upload test results'
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-test-results
+          name: dotnet-test-results-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: apps/shortnr-service/shortnr.Tests/TestResults
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
