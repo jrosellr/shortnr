@@ -1,3 +1,5 @@
+version: '3.9'
+name: 'shortnr-local'
 services:
   web:
     build: ./shortnr-client
@@ -32,6 +34,7 @@ services:
       watch:
         - path: ./shortnr-service
           action: rebuild
+
   cache:
     image: redis:7.2.3-alpine3.19
     container_name: shortnr-cache
