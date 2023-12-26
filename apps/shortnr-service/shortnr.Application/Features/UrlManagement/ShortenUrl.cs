@@ -35,8 +35,8 @@ public static class ShortenUrlFeature
 
     public static Results<Ok<ShortenResponse>, BadRequest> ShortenUrl([FromBody] ShortenRequest request, ITimeService timeService)
     {
-        var hasValue = string.IsNullOrWhiteSpace(request.Url);
-        if (!hasValue)
+        var isEmpty = string.IsNullOrWhiteSpace(request.Url);
+        if (isEmpty)
         {
             return TypedResults.BadRequest();
         }
