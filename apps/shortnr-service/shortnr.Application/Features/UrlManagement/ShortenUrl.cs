@@ -4,13 +4,14 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 
 namespace shortnr.Application.Features.UrlManagement;
 
-public record ShortenRequest(string Url);
+public record ShortenRequest(string? Url);
 public record ShortenResponse(string Url);
 
 public static class ShortenUrlFeature
@@ -32,26 +33,30 @@ public static class ShortenUrlFeature
         });
     }
 
-    public static IResult ShortenUrl([FromBody] ShortenRequest request, ITimeService timeService)
+    public static Results<Ok<ShortenResponse>, BadRequest> ShortenUrl([FromBody] ShortenRequest request, ITimeService timeService)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(request.Url);
+        var isEmpty = string.IsNullOrWhiteSpace(request.Url);
+        if (isEmpty)
+        {
+            return TypedResults.BadRequest();
+        }
 
         var isValid = Uri.TryCreate(request.Url, UriKind.Absolute, out var uri);
         if (!isValid)
         {
-            return Results.BadRequest();
+            return TypedResults.BadRequest();
         }
 
         var hasAllowedScheme = uri is { Scheme: "http" or "https" };
         if (!hasAllowedScheme)
         {
-            return Results.BadRequest();
+            return TypedResults.BadRequest();
         }
 
         var now = timeService.Now();
         var shortenedUrl = UrlShortener.Shorten("http://localhost:5120/{0}", now);
 
-        return Results.Ok(new ShortenResponse(shortenedUrl));
+        return TypedResults.Ok(new ShortenResponse(shortenedUrl));
     }
 }
 
@@ -60,7 +65,7 @@ public interface ITimeService
     public long Now();
 }
 
-public class TimeService : ITimeService
+internal class TimeService : ITimeService
 {
     public long Now() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 }

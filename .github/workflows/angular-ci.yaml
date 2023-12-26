@@ -10,7 +10,7 @@ on:
 
   pull_request:
     paths:
-      - apps/shortnr-client/*
+      - apps/shortnr-client/**
 
 jobs:
   angular-security-scan:
@@ -41,7 +41,7 @@ jobs:
               --metrics="off" \
               --sarif \
               --output="/src/sast-results.sarif"
-    
+
       - name: 'Upload static analysis results to GitHub'
         uses: github/codeql-action/upload-sarif@v2
         with:
@@ -56,7 +56,7 @@ jobs:
 
       - name: 'generate npm SBOM'
         run: cyclonedx-npm --ignore-npm-errors --validate --output-file npm_sbom.json --omit dev
-      
+
       - name: 'generate source code SBOM'
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
@@ -71,7 +71,7 @@ jobs:
             cyclonedx/cyclonedx-cli merge \
               --input-files "/src/npm_sbom.json" "/src/source_sbom.json" \
               --output-file "/src/sbom.json"
-      
+
       - name: 'run OSV Scanner analysis'
         run: |
           docker run --rm -t -v "${{ github.workspace }}/apps/shortnr-client:/src" \
@@ -135,7 +135,7 @@ jobs:
         with:
           node-version: 20.10.0
           working-directory: ./apps/shortnr-client
-  
+
       - name: 'npm run test:ci'
         run: npm run test:ci
 
