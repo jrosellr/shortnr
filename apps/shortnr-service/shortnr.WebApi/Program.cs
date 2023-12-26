@@ -1,11 +1,12 @@
-using System.Text.Json.Serialization;
-using shortnr.WebApi.Endpoints;
 using StackExchange.Redis;
 using Amazon.DynamoDBv2;
+using shortnr.WebApi.Features;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
 builder.Services.AddHealthChecks();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddSingleton<ConnectionMultiplexer>((_) =>
 {
     var connectionString = builder.Configuration.GetValue<string>("redis:connectionString");
@@ -24,23 +25,12 @@ builder.Services.AddSingleton<AmazonDynamoDBClient>((_) =>
     return new AmazonDynamoDBClient(config);
 });
 
-builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
-});
+builder.Services.AddFeatureServices();
 
 var app = builder.Build();
 
-app.MapGroup("/api")
-  .MapPost("/shorten", Endpoints.Shorten);
+app.MapFeatureEndpoints();
 
 app.MapHealthChecks("/health");
 
-app.MapGet("/{*slug}", Endpoints.Redirect);
-
 app.Run();
-
-
-[JsonSerializable(typeof(ShortenResponse))]
-[JsonSerializable(typeof(ShortenRequest))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext { }

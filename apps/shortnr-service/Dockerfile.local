@@ -4,15 +4,12 @@ FROM mcr.microsoft.com/dotnet/nightly/sdk:8.0-alpine-aot AS build
 ARG TARGETARCH
 WORKDIR /build
 
-# copy csproj and restore as distinct layers
-COPY **/*.csproj .
-COPY *.props .
-COPY *.config .
-RUN dotnet restore -r "linux-musl-$TARGETARCH"
+# copy and restore as distinct layers
+COPY . .
+RUN dotnet restore -r "linux-musl-$TARGETARCH" ./shortnr.WebApi/shortnr.WebApi.csproj
 
-# copy and publish app and libraries
-COPY **/* .
-RUN dotnet publish -c "Debug" --no-restore -o "/app"
+# publish app and libraries
+RUN dotnet publish -c "Debug" --no-restore -o "/app" ./shortnr.WebApi/shortnr.WebApi.csproj
 
 
 # final stage/image
