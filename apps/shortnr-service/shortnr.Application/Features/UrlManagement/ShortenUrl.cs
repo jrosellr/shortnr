@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace shortnr.Application.Features.UrlManagement;
 
-public record ShortenRequest(string Url);
+public record ShortenRequest(string? Url);
 public record ShortenResponse(string Url);
 
 public static class ShortenUrlFeature
