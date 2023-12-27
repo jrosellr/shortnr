@@ -25,7 +25,7 @@ public static class ShortenUrlFeature
 
     public static void AddServices(IServiceCollection services)
     {
-        services.AddSingleton<ITimeService, TimeService>();
+        services.AddSingleton<AtomicCounter>();
 
         services.ConfigureHttpJsonOptions(options =>
         {
@@ -33,7 +33,7 @@ public static class ShortenUrlFeature
         });
     }
 
-    public static Results<Ok<ShortenResponse>, BadRequest> ShortenUrl([FromBody] ShortenRequest request, ITimeService timeService)
+    public static Results<Ok<ShortenResponse>, BadRequest> ShortenUrl([FromBody] ShortenRequest request, IAtomicCounter atomicCounter)
     {
         var isEmpty = string.IsNullOrWhiteSpace(request.Url);
         if (isEmpty)
@@ -53,21 +53,11 @@ public static class ShortenUrlFeature
             return TypedResults.BadRequest();
         }
 
-        var now = timeService.Now();
-        var shortenedUrl = UrlShortener.Shorten("http://localhost:5120/{0}", now);
+        var counter = atomicCounter.Next();
+        var shortenedUrl = UrlShortener.Shorten("http://localhost:5120/{0}", counter);
 
         return TypedResults.Ok(new ShortenResponse(shortenedUrl));
     }
-}
-
-public interface ITimeService
-{
-    public long Now();
-}
-
-internal class TimeService : ITimeService
-{
-    public long Now() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 }
 
 internal static class UrlShortener
@@ -78,6 +68,30 @@ internal static class UrlShortener
           .ToUpperInvariant();
 
         return string.Format(format, $"{hash[..3]}-{hash[3..6]}");
+    }
+}
+
+public interface IAtomicCounter
+{
+    public long Next();
+}
+
+internal class AtomicCounter : IAtomicCounter
+{
+    private long _counter = 0;
+    private readonly object _lock = new();
+
+    public long Next()
+    {
+        long current;
+
+        lock (_lock)
+        {
+            current = _counter;
+            _counter += 1;
+        }
+
+        return current;
     }
 }
 

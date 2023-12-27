@@ -3,16 +3,19 @@ using shortnr.Application.Features.UrlManagement;
 
 namespace shortnr.Tests.Features.UrlManagement.ShortenUrl;
 
-internal class FakeTimeService : ITimeService
+internal class FakeAtomicCounter : IAtomicCounter
 {
-    public long FakeValue { get; init; }
+    public long FakeValue { get; set; }
 
-    public long Now() => FakeValue;
+    public long Next()
+    {
+        return FakeValue;
+    }
 }
 
 public class UnitTests
 {
-    private static readonly ITimeService _fakeTimeService = new FakeTimeService
+    private static readonly FakeAtomicCounter _atomicCounter = new()
     {
         FakeValue = 123
     };
@@ -28,7 +31,7 @@ public class UnitTests
         /** WHEN
         *   The URL is shortened.
         */
-        var results = ShortenUrlFeature.ShortenUrl(request, _fakeTimeService);
+        var results = ShortenUrlFeature.ShortenUrl(request, _atomicCounter);
 
         /** THEN
         *   The URL correctly shortened
@@ -55,7 +58,7 @@ public class UnitTests
         /** WHEN
         *   The URL is shortened.
         */
-        var results = ShortenUrlFeature.ShortenUrl(request, _fakeTimeService);
+        var results = ShortenUrlFeature.ShortenUrl(request, _atomicCounter);
 
         /** THEN
         *   The URL is rejected and a BadRequest is returned.
