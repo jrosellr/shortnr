@@ -42,13 +42,24 @@ services:
     container_name: shortnr-cache
     ports:
       - "6379:6379"
+    volumes:
+      - shortnr-cache-data:/data
+    restart: always
 
   database:
     image: amazon/dynamodb-local:2.2.0
     container_name: shortnr-database
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
     ports:
       - "8000:8000"
+    volumes:
+      - shortnr-database-data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
 
 networks:
   default:
     name: shortnr_default
+
+volumes:
+  shortnr-database-data: {}
+  shortnr-cache-data: {}
