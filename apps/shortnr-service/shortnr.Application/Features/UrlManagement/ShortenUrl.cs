@@ -2,10 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 
@@ -20,12 +21,13 @@ public static class ShortenUrlFeature
     [UnconditionalSuppressMessage("Aot", "IL2026:RequiresUnreferencedCodeAttribute")]
     public static void MapEndpoint(WebApplication app)
     {
-        app.MapPost("/api/shorten", ShortenUrl);
+        app.MapPost("/api/shorten", ShortenUrlAsync);
     }
 
     public static void AddServices(IServiceCollection services)
     {
-        services.AddSingleton<AtomicCounter>();
+        services.AddSingleton<IAtomicCounter, AtomicCounter>();
+        services.AddScoped<IUrlRepository, UrlRepository>();
 
         services.ConfigureHttpJsonOptions(options =>
         {
@@ -33,7 +35,7 @@ public static class ShortenUrlFeature
         });
     }
 
-    public static Results<Ok<ShortenResponse>, BadRequest> ShortenUrl([FromBody] ShortenRequest request, IAtomicCounter atomicCounter)
+    public static async Task<Results<Ok<ShortenResponse>, BadRequest>> ShortenUrlAsync(ShortenRequest request, IAtomicCounter atomicCounter, IUrlRepository repository, CancellationToken cancellationToken)
     {
         var isEmpty = string.IsNullOrWhiteSpace(request.Url);
         if (isEmpty)
@@ -54,20 +56,22 @@ public static class ShortenUrlFeature
         }
 
         var counter = atomicCounter.Next();
-        var shortenedUrl = UrlShortener.Shorten("http://localhost:5120/{0}", counter);
+        var key = UrlShortener.GenerateKey(counter);
 
-        return TypedResults.Ok(new ShortenResponse(shortenedUrl));
+        await repository.CreateAsync(key, counter, request.Url!, cancellationToken);
+
+        var url = string.Format("http://localhost:5120/{0}-{1}", key[..3], key[3..6]);
+
+        return TypedResults.Ok(new ShortenResponse(url));
     }
 }
 
 internal static class UrlShortener
 {
-    public static string Shorten(string format, long timestamp)
+    public static string GenerateKey(long x)
     {
-        var hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(timestamp.ToString())))
-          .ToUpperInvariant();
-
-        return string.Format(format, $"{hash[..3]}-{hash[3..6]}");
+        return Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(x.ToString())))
+          .ToUpperInvariant()[..6];
     }
 }
 
@@ -92,6 +96,29 @@ internal class AtomicCounter : IAtomicCounter
         }
 
         return current;
+    }
+}
+
+public interface IUrlRepository
+{
+    public Task CreateAsync(string key, long id, string url, CancellationToken cancellationToken);
+}
+
+internal class UrlRepository(IAmazonDynamoDB dynamoDb) : IUrlRepository
+{
+    public async Task CreateAsync(string key, long id, string url, CancellationToken cancellationToken)
+    {
+        var item = new Dictionary<string, AttributeValue>()
+        {
+            ["Key"] = new AttributeValue(key),
+            ["Id"] = new AttributeValue
+            {
+                N = id.ToString()
+            },
+            ["Url"] = new AttributeValue(url)
+        };
+
+        await dynamoDb.PutItemAsync("Url", item, cancellationToken);
     }
 }
 

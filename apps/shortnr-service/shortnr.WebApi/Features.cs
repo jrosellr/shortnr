@@ -1,7 +1,7 @@
 using shortnr.Application.Features.Navigation;
 using shortnr.Application.Features.UrlManagement;
 
-namespace shortnr.WebApi.Features;
+namespace shortnr.WebApi;
 
 public static class Features
 {

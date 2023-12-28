@@ -11,4 +11,11 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" />
+
+    <PackageReference Include="AWSSDK.Core" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" />
+  </ItemGroup>
 </Project>
