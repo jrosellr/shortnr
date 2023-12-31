@@ -26,7 +26,8 @@ I'd like to deploy it to AWS but I'm leaving that as a next step, so for now I'l
 This project will be considered complete when the following requirements are met:
 
   - [x] The project runs locally using Docker Compose **only**
-  - [x] The project supports the hot reloading of the Docker images while running
+  - [ ] ~~The project supports the hot reloading of the Docker images while running~~
+    - Finally I removed this feature as it is not worth pursuing. I got it working but I do not find it that useful.
   - [x] The project supports both Windows and Linux dev environments
   - [ ] All automated tests pass (Cypress, Postman, unit tests, etc.)
   - [ ] UAT is done

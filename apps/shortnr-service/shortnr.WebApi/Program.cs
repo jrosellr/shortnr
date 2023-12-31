@@ -1,6 +1,5 @@
 using StackExchange.Redis;
-using Amazon.DynamoDBv2;
-using shortnr.WebApi.Features;
+using shortnr.WebApi;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -15,16 +14,7 @@ builder.Services.AddSingleton<ConnectionMultiplexer>((_) =>
     return ConnectionMultiplexer.Connect(connectionString);
 });
 
-builder.Services.AddSingleton<AmazonDynamoDBClient>((_) =>
-{
-    var config = new AmazonDynamoDBConfig
-    {
-        ServiceURL = "http://shortnr-database:8000"
-    };
-
-    return new AmazonDynamoDBClient(config);
-});
-
+builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddFeatureServices();
 
 var app = builder.Build();
@@ -34,3 +24,4 @@ app.MapFeatureEndpoints();
 app.MapHealthChecks("/health");
 
 app.Run();
+

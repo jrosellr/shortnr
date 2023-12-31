@@ -50,7 +50,7 @@ jobs:
               --exclude-dev \
               --json \
               --out "/src" \
-              --filename "sbom.json"
+              --filename "/src/sbom.json"
 
       - name: 'Run OSV Scanner analysis'
         run: |

@@ -1,4 +1,3 @@
-version: '3.9'
 name: 'shortnr-local'
 services:
   web:
@@ -7,16 +6,7 @@ services:
     container_name: shortnr-web
     ports:
       - "4200:4200"
-    develop:
-      watch:
-        - path: ./shortnr-client/package.json
-          action: rebuild
-        - path: ./shortnr-client/tsconfig*.json
-          action: rebuild
-        - path: ./shortnr-client/angular.json
-          action: rebuild
-        - path: ./shortnr-client/src/
-          action: sync
+    profiles: ["frontend"]
 
   api:
     build:
@@ -24,6 +14,9 @@ services:
       dockerfile: Dockerfile.local
     image: shortnr/api
     container_name: shortnr-api
+    depends_on:
+      - cache
+      - database
     ports:
       - "5120:8080"
     environment:
@@ -32,10 +25,6 @@ services:
       - AWS_ACCESS_KEY_ID=FAKEAWSKEYID
       - AWS_SECRET_ACCESS_KEY=FAKEAWSSECRETKEY
       - AWS_REGION=eu-west-1
-    develop:
-      watch:
-        - path: ./shortnr-service
-          action: rebuild
 
   cache:
     image: redis:7.2.3-alpine3.19
@@ -50,6 +39,7 @@ services:
     image: amazon/dynamodb-local:2.2.0
     container_name: shortnr-database
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    user: root
     ports:
       - "8000:8000"
     volumes:
@@ -61,5 +51,6 @@ networks:
     name: shortnr_default
 
 volumes:
-  shortnr-database-data: {}
-  shortnr-cache-data: {}
+  shortnr-database-data:
+  shortnr-cache-data:
+

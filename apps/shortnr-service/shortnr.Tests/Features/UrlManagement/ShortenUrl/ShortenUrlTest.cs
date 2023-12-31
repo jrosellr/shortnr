@@ -1,34 +1,44 @@
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using Microsoft.AspNetCore.Http.HttpResults;
+using NSubstitute;
 using shortnr.Application.Features.UrlManagement;
 
 namespace shortnr.Tests.Features.UrlManagement.ShortenUrl;
 
-internal class FakeTimeService : ITimeService
+internal class FakeAtomicCounter : IAtomicCounter
 {
-    public long FakeValue { get; init; }
+    public long FakeValue { get; set; }
 
-    public long Now() => FakeValue;
+    public long Next()
+    {
+        return FakeValue;
+    }
 }
 
 public class UnitTests
 {
-    private static readonly ITimeService _fakeTimeService = new FakeTimeService
+    private static readonly FakeAtomicCounter _atomicCounter = new()
     {
         FakeValue = 123
     };
 
     [Fact]
-    public void Urls_are_shortened()
+    public async void Urls_are_shortened()
     {
         /** GIVEN
         *   A valid URL
         */
         var request = new ShortenRequest("https://foobar.com");
 
+        var dynamoDb = Substitute.For<IAmazonDynamoDB>();
+        dynamoDb.PutItemAsync("Url", Arg.Any<Dictionary<string, AttributeValue>>(), CancellationToken.None).Returns(Task.FromResult(new PutItemResponse()));
+        var repository = new UrlRepository(dynamoDb);
+
         /** WHEN
         *   The URL is shortened.
         */
-        var results = ShortenUrlFeature.ShortenUrl(request, _fakeTimeService);
+        var results = await ShortenUrlFeature.ShortenUrlAsync(request, _atomicCounter, repository, CancellationToken.None);
 
         /** THEN
         *   The URL correctly shortened
@@ -41,21 +51,25 @@ public class UnitTests
 
         Assert.True(uriIsValid);
         Assert.Equal("/202-CB9", uri!.AbsolutePath);
+        await dynamoDb.Received().PutItemAsync("Url", Arg.Any<Dictionary<string, AttributeValue>>(), CancellationToken.None);
     }
 
     [Theory]
     [MemberData(nameof(InvalidUrls))]
-    public void Invalid_urls_are_rejected(string? invalidUrl)
+    public async void Invalid_urls_are_rejected(string? invalidUrl)
     {
         /** GIVEN
         *   An invalid URL
         */
         var request = new ShortenRequest(invalidUrl);
 
+        var dynamoDb = Substitute.For<IAmazonDynamoDB>();
+        var repository = new UrlRepository(dynamoDb);
+
         /** WHEN
         *   The URL is shortened.
         */
-        var results = ShortenUrlFeature.ShortenUrl(request, _fakeTimeService);
+        var results = await ShortenUrlFeature.ShortenUrlAsync(request, _atomicCounter, repository, CancellationToken.None);
 
         /** THEN
         *   The URL is rejected and a BadRequest is returned.
