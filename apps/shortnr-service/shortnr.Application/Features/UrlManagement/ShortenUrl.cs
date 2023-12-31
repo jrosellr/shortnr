@@ -21,6 +21,7 @@ public static class ShortenUrlFeature
     [UnconditionalSuppressMessage("Aot", "IL2026:RequiresUnreferencedCodeAttribute")]
     public static void MapEndpoint(WebApplication app)
     {
+
         app.MapPost("/api/shorten", ShortenUrlAsync);
     }
 
@@ -124,4 +125,6 @@ internal class UrlRepository(IAmazonDynamoDB dynamoDb) : IUrlRepository
 
 [JsonSerializable(typeof(ShortenRequest))]
 [JsonSerializable(typeof(ShortenResponse))]
+[JsonSerializable(typeof(Task<Results<Ok<ShortenResponse>, BadRequest>>))]
 internal partial class FeatureJsonSerializerContext : JsonSerializerContext { }
+

@@ -6,3 +6,4 @@ aws dynamodb describe-table --endpoint-url $url --region $region `
 
 aws dynamodb scan --endpoint-url $url --region $region `
     --table-name "Url"
+
